@@ -1,6 +1,22 @@
 from Attack import *
 from tkinter import *
 from Pokedex import *
+from tkinter import simpledialog
+
+class UserOpponentDialog(simpledialog.Dialog):
+    def body(self, master):
+        Label(master, text="Assign the Pokemon to:").pack()
+
+        self.result_var = StringVar()
+        self.result_var.set("User")
+
+        Radiobutton(master, text="Your Pokemon", variable=self.result_var, value="User").pack()
+        Radiobutton(master, text="Opponent", variable=self.result_var, value="Opponent").pack()
+
+        return None
+
+    def apply(self):
+        self.result = self.result_var.get()
 
 class Application(Frame):
     def __init__(self, master):
@@ -8,37 +24,36 @@ class Application(Frame):
         self.grid()
 
         # Assigning string variables for user text entry
-        self.userStrVar = StringVar()
-        self.userStrVar.set("")
-
-        self.cpuStrVar = StringVar()
-        self.cpuStrVar.set("")
-
-        self.moveStrVar1 = StringVar()
-        self.moveStrVar1.set("")
-
-        self.moveStrVar2 = StringVar()
-        self.moveStrVar2.set("")
+        self.userStrVar = StringVar(value="")
+        self.cpuStrVar = StringVar(value="")
+        self.moveStrVar1 = StringVar(value="")
+        self.moveStrVar2 = StringVar(value="")
 
         # WIDGETS
         # Buttons
-        self.pokedexBtn = Button(self, text="See All Pokemon", command=self.seePokedex)
+        self.pokedexBtn = Button(self, text="Pokedex List", command=self.seePokedex)
         self.pokedexBtn.grid(row=0, column=1)
 
-        self.checkBtn = Button(self, text="Lock In", command=self.checkPokemon)
+        self.checkBtn = Button(self, text="Ready gan", command=self.checkPokemon)
         self.checkBtn.grid(row=1, column=1)
 
-        self.battleBtn = Button(self, text="Begin Battle", state=DISABLED, command=self.beginBattle)
+        self.battleBtn = Button(self, text="Gas kan by 1", state=DISABLED, command=self.beginBattle)
         self.battleBtn.grid(row=2, column=1)
 
         self.moveBtn1 = Button(self, text="Select Move", state=DISABLED, command=self.selectMove1)
         self.moveBtn1.grid(row=7, column=0)
+        
+        self.attackBtn1 = Button(self, text="Attack", state=DISABLED, command=self.confirmMoveSelection1)
+        self.attackBtn1.grid(row=10, column=0)
 
         self.moveBtn2 = Button(self, text="Select Move", state=DISABLED, command=self.selectMove2)
         self.moveBtn2.grid(row=7, column=2)
 
         self.restartBtn = Button(self, text="Restart?", state=DISABLED, command=self.restart)
         self.restartBtn.grid(row=7, column=1)
+        
+        # Placeholder for move menu
+        self.move_menu1 = None
 
         # Labels, Entry fields, and Text Boxes
         self.entLabel1 = Label(self, text="Choose your Pokemon: ")
@@ -62,11 +77,11 @@ class Application(Frame):
         self.txtStats = Text(self, width=50, height=10, state=DISABLED)  # Main text box
         self.txtStats.grid(row=3, column=1)
 
-        self.moveEnt1 = Entry(self, textvariable=self.moveStrVar1, state=DISABLED)  # Move entry field 1
-        self.moveEnt1.grid(row=6,column=0)
+        # self.moveEnt1 = Entry(self, textvariable=self.moveStrVar1, state=DISABLED)  # Move entry field 1
+        # self.moveEnt1.grid(row=6,column=0)
 
-        self.moveEnt2 = Entry(self, textvariable=self.moveStrVar2, state=DISABLED)  # Move entry field 2
-        self.moveEnt2.grid(row=6, column=2)
+        # self.moveEnt2 = Entry(self, textvariable=self.moveStrVar2, state=DISABLED)  # Move entry field 2
+        # self.moveEnt2.grid(row=6, column=2)
 
         # Sprites
         tempImg = PhotoImage(file="Sprites/white.gif")  # first putting a blank image for each sprite, will replace later after pressing "Begin Battle"
@@ -88,11 +103,37 @@ class Application(Frame):
 
     # Creating a method to print the list of all Pokemon
     def seePokedex(self):
-        self.txtStats.config(state=NORMAL)
-        self.txtStats.delete(0.0, END)
+        pokedex_window = Toplevel(self)
+        pokedex_window.title("Pokedex")
+
+        pokedex_listbox = Listbox(pokedex_window)
         for pokemon in pokedex:
-            self.txtStats.insert(END, "\n" + pokemon)
-        self.txtStats.config(state=DISABLED)
+            pokedex_listbox.insert(END, pokemon)
+
+        pokedex_listbox.pack()
+
+        def select_pokemon(event):
+            selected_pokemon = pokedex_listbox.get(pokedex_listbox.curselection())
+
+            dialog = UserOpponentDialog(pokedex_window)
+            choice = dialog.result
+
+            if choice == "User":
+                self.userStrVar.set(selected_pokemon)
+            elif choice == "Opponent":
+                self.cpuStrVar.set(selected_pokemon)
+
+            pokedex_window.destroy()
+
+        pokedex_listbox.bind("<Double-Button-1>", select_pokemon)
+
+        # Make the window draggable
+        def on_drag(event):
+            x, y = pokedex_window.winfo_pointerxy()
+            pokedex_window.geometry(f"+{x-50}+{y-50}")
+
+        pokedex_window.bind("<B1-Motion>", on_drag)
+
 
     # Creating a method to check if the Pokemon are valid and actually usable
     # Returns an error message if the Pokemon are not usable
@@ -103,7 +144,6 @@ class Application(Frame):
                 self.txtStats.delete(0.0, END)
                 self.txtStats.insert(0.0, "You are ready to battle.")
                 self.txtStats.config(state=DISABLED)
-
                 self.checkBtn.config(state=DISABLED)
                 self.entName1.config(state=DISABLED)
                 self.entName2.config(state=DISABLED)
@@ -146,16 +186,29 @@ class Application(Frame):
         # Deciding which Pokemon to enable first based on the speed (battleSpeed) stat
         if self.userPokemon.isAlive() and self.cpuPokemon.isAlive():
             if self.userPokemon.battleSpeed >= self.cpuPokemon.battleSpeed:
-                self.moveEnt1.config(state=NORMAL)
+                # self.moveEnt1.config(state=NORMAL)
                 self.moveBtn1.config(state=NORMAL)
             elif self.cpuPokemon.battleSpeed > self.userPokemon.battleSpeed:
-                self.moveEnt2.config(state=NORMAL)
+                # self.moveEnt2.config(state=NORMAL)
                 self.moveBtn2.config(state=NORMAL)
         self.battleBtn.config(state=DISABLED)
-
-    # Method takes the user-inputted string and plugs it into the attack function
+        
+    # Creates a dropdown menu of the user's Pokemon's moves
     # Prints the result of the attack function to the center text box
     def selectMove1(self):
+        # Create the dropdown menu for move selection
+        move_menu_options = self.userPokemon.moveList
+        self.moveStrVar1.set(move_menu_options[0])  # Set the default value
+
+        self.move_menu1 = OptionMenu(self, self.moveStrVar1, *move_menu_options)
+        self.move_menu1.grid(row=8, column=0)
+        
+        self.move_menu1.bind("<Configure>", lambda event: self.confirmAttack1())
+        
+    def confirmAttack1(self):
+        self.attackBtn1.config(state=NORMAL)
+    
+    def confirmMoveSelection1(self):
         if self.moveStrVar1.get().lower() in self.userPokemon.moveList:
             self.txtStats.config(state=NORMAL)
             self.txtStats.delete(0.0, END)
@@ -172,27 +225,25 @@ class Application(Frame):
             self.moveText1.config(state=DISABLED)
             self.moveText2.config(state=DISABLED)
 
-            # If one of the Pokemon faints, this method will end the battle by disabling all other buttons/fields except
-            # for the Restart button
-            if not self.cpuPokemon.isAlive():
-                self.txtStats.config(state=NORMAL)
-                self.txtStats.insert(END, "\n" + self.cpuPokemon.faint())
-                self.txtStats.insert(END, "\nPlay again?")
-                self.txtStats.config(state=DISABLED)
-                self.moveEnt1.delete(0, END)
-                self.restartBtn.config(state=NORMAL)
-                self.moveBtn1.config(state=DISABLED)
-                self.moveEnt1.config(state=DISABLED)
-                self.battleBtn.config(state=DISABLED)
+        # If one of the Pokemon faints, this method will end the battle by disabling all other buttons/fields except
+        # for the Restart button
+        if not self.cpuPokemon.isAlive():
+            self.txtStats.config(state=NORMAL)
+            self.txtStats.insert(END, "\n" + self.cpuPokemon.faint())
+            self.txtStats.insert(END, "\nPlay again?")
+            self.txtStats.config(state=DISABLED)
+            self.restartBtn.config(state=NORMAL)
+            self.moveBtn1.config(state=DISABLED)
+            self.attackBtn1.config(state=DISABLED)
+            self.move_menu1.grid_forget()  # Remove the dropdown menu
 
-            # If both Pokemon are alive, this method will disable the current Pokemon and enable the opposing Pokemon so
-            # it can make its move as well
-            else:
-                self.moveEnt1.delete(0, END)
-                self.moveEnt1.config(state=DISABLED)
-                self.moveBtn1.config(state=DISABLED)
-                self.moveEnt2.config(state=NORMAL)
-                self.moveBtn2.config(state=NORMAL)
+        # If both Pokemon are alive, this method will disable the current Pokemon and enable the opposing Pokemon so
+        # it can make its move as well
+        else:
+            self.moveBtn1.config(state=DISABLED)
+            self.move_menu1.grid_forget()  # Remove the dropdown menu
+            self.moveBtn2.config(state=NORMAL)
+            self.attackBtn1.config(state=DISABLED)
 
     # Does the same thing as selectMove1() just with respect to the other Pokemon
     def selectMove2(self):
