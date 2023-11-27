@@ -34,7 +34,7 @@ class Application(Frame):
         self.pokedexBtn = Button(self, text="Pokedex List", command=self.seePokedex)
         self.pokedexBtn.grid(row=0, column=1)
 
-        self.checkBtn = Button(self, text="Ready gan", command=self.checkPokemon)
+        self.checkBtn = Button(self, text="Ready gan", state=DISABLED, command=self.checkPokemon)
         self.checkBtn.grid(row=1, column=1)
 
         self.battleBtn = Button(self, text="Gas kan by 1", state=DISABLED, command=self.beginBattle)
@@ -46,8 +46,8 @@ class Application(Frame):
         self.attackBtn1 = Button(self, text="Attack", state=DISABLED, command=self.confirmMoveSelection1)
         self.attackBtn1.grid(row=10, column=0)
 
-        self.moveBtn2 = Button(self, text="Select Move", state=DISABLED, command=self.selectMove2)
-        self.moveBtn2.grid(row=7, column=2)
+        # self.moveBtn2 = Button(self, text="Select Move", state=DISABLED, command=self.selectMove2)
+        # self.moveBtn2.grid(row=7, column=2)
 
         self.restartBtn = Button(self, text="Restart?", state=DISABLED, command=self.restart)
         self.restartBtn.grid(row=7, column=1)
@@ -113,6 +113,7 @@ class Application(Frame):
         pokedex_listbox.pack()
 
         def select_pokemon(event):
+            
             selected_pokemon = pokedex_listbox.get(pokedex_listbox.curselection())
 
             dialog = UserOpponentDialog(pokedex_window)
@@ -122,7 +123,11 @@ class Application(Frame):
                 self.userStrVar.set(selected_pokemon)
             elif choice == "Opponent":
                 self.cpuStrVar.set(selected_pokemon)
-
+                
+            if self.userStrVar == "" and self.cpuStrVar == "":
+                self.checkBtn.config(state=DISABLED)
+            elif self.userStrVar.get() != "" and self.cpuStrVar.get() != "":
+                self.checkBtn.config(state=NORMAL)
             pokedex_window.destroy()
 
         pokedex_listbox.bind("<Double-Button-1>", select_pokemon)
@@ -190,7 +195,7 @@ class Application(Frame):
                 self.moveBtn1.config(state=NORMAL)
             elif self.cpuPokemon.battleSpeed > self.userPokemon.battleSpeed:
                 # self.moveEnt2.config(state=NORMAL)
-                self.moveBtn2.config(state=NORMAL)
+                self.waitToSelectMove2()
         self.battleBtn.config(state=DISABLED)
         
     # Creates a dropdown menu of the user's Pokemon's moves
@@ -242,9 +247,17 @@ class Application(Frame):
         else:
             self.moveBtn1.config(state=DISABLED)
             self.move_menu1.grid_forget()  # Remove the dropdown menu
-            self.moveBtn2.config(state=NORMAL)
             self.attackBtn1.config(state=DISABLED)
-
+            self.waitToSelectMove2()
+            
+    def waitToSelectMove2(self):
+        # Get a random move from the CPU's move list
+        cpu_selected_move = random.choice(self.cpuPokemon.moveList)
+        self.moveStrVar2.set(cpu_selected_move)
+        # Process the selected move after a delay
+        self.after(2000, self.selectMove2)
+        
+        
     # Does the same thing as selectMove1() just with respect to the other Pokemon
     def selectMove2(self):
         if self.moveStrVar2.get().lower() in self.cpuPokemon.moveList:
@@ -268,19 +281,12 @@ class Application(Frame):
                 self.txtStats.insert(END, "\n" + self.userPokemon.faint())
                 self.txtStats.insert(END, "\nPlay again?")
                 self.txtStats.config(state=DISABLED)
-                self.moveEnt2.delete(0, END)
                 self.restartBtn.config(state=NORMAL)
                 self.moveText1.config(state=DISABLED)
                 self.moveText2.config(state=DISABLED)
-                self.moveEnt2.config(state=DISABLED)
-                self.moveBtn2.config(state=DISABLED)
                 self.battleBtn.config(state=DISABLED)
 
             else:
-                self.moveEnt2.delete(0, END)
-                self.moveEnt2.config(state=DISABLED)
-                self.moveBtn2.config(state=DISABLED)
-                self.moveEnt1.config(state=NORMAL)
                 self.moveBtn1.config(state=NORMAL)
 
     # Completely clears and resets all text fields, buttons, and images to their original state
@@ -297,8 +303,6 @@ class Application(Frame):
         self.txtStats.delete(0.0, END)
         self.moveText1.delete(0.0, END)
         self.moveText2.delete(0.0, END)
-        self.moveEnt1.delete(0, END)
-        self.moveEnt2.delete(0, END)
 
         self.txtStats.config(state=DISABLED)
         self.moveText1.config(state=DISABLED)
@@ -311,7 +315,6 @@ class Application(Frame):
         self.entName2.config(state=NORMAL)
         self.entName2.delete(0, END)
 
-        self.checkBtn.config(state=NORMAL)
         self.pokedexBtn.config(state=NORMAL)
 
         # Disabling the restart button so the user can't constantly restart the game
