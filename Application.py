@@ -71,8 +71,8 @@ class Application(Frame):
         self.entName2 = Entry(self, textvariable=self.cpuStrVar)  # Pokemon name entry
         self.entName2.grid(row=1, column=2, rowspan=2)
 
-        self.moveText2 = Text(self, width=20, height=8, state=DISABLED)  # Text box with moveset and HP
-        self.moveText2.grid(row=5, column=2, sticky=S)
+        # self.moveText2 = Text(self, width=20, height=8, state=DISABLED)  # Text box with moveset and HP
+        # self.moveText2.grid(row=5, column=2, sticky=S)
 
         self.txtStats = Text(self, width=50, height=10, state=DISABLED)  # Main text box
         self.txtStats.grid(row=3, column=1)
@@ -180,13 +180,13 @@ class Application(Frame):
 
         # Printing each Pokemon's HP and moveset to its respective box
         self.moveText1.config(state=NORMAL)
-        self.moveText2.config(state=NORMAL)
+        # self.moveText2.config(state=NORMAL)
         self.moveText1.delete(0.0, END)
-        self.moveText2.delete(0.0, END)
+        # self.moveText2.delete(0.0, END)
         self.moveText1.insert(0.0, self.userPokemon.printHP() + "\n" + self.userPokemon.printMoves())
-        self.moveText2.insert(0.0, self.cpuPokemon.printHP() + "\n" + self.cpuPokemon.printMoves())
+        # self.moveText2.insert(0.0, self.cpuPokemon.printHP() + "\n" + self.cpuPokemon.printMoves())
         self.moveText1.config(state=DISABLED)
-        self.moveText2.config(state=DISABLED)
+        # self.moveText2.config(state=DISABLED)
 
         # Deciding which Pokemon to enable first based on the speed (battleSpeed) stat
         if self.userPokemon.isAlive() and self.cpuPokemon.isAlive():
@@ -222,13 +222,13 @@ class Application(Frame):
 
             # Updating the info for both Pokemon after the move has been used
             self.moveText1.config(state=NORMAL)
-            self.moveText2.config(state=NORMAL)
+            # self.moveText2.config(state=NORMAL)
             self.moveText1.delete(0.0, END)
-            self.moveText2.delete(0.0, END)
+            # self.moveText2.delete(0.0, END)
             self.moveText1.insert(0.0, self.userPokemon.printHP() + "\n" + self.userPokemon.printMoves())
-            self.moveText2.insert(0.0, self.cpuPokemon.printHP() + "\n" + self.cpuPokemon.printMoves())
+            # self.moveText2.insert(0.0, self.cpuPokemon.printHP() + "\n" + self.cpuPokemon.printMoves())
             self.moveText1.config(state=DISABLED)
-            self.moveText2.config(state=DISABLED)
+            # self.moveText2.config(state=DISABLED)
 
         # If one of the Pokemon faints, this method will end the battle by disabling all other buttons/fields except
         # for the Restart button
@@ -268,13 +268,13 @@ class Application(Frame):
 
             # Updating the info for the other Pokemon
             self.moveText1.config(state=NORMAL)
-            self.moveText2.config(state=NORMAL)
+            # self.moveText2.config(state=NORMAL)
             self.moveText1.delete(0.0, END)
-            self.moveText2.delete(0.0, END)
+            # self.moveText2.delete(0.0, END)
             self.moveText1.insert(0.0, self.userPokemon.printHP() + "\n" + self.userPokemon.printMoves())
-            self.moveText2.insert(0.0, self.cpuPokemon.printHP() + "\n" + self.cpuPokemon.printMoves())
+            # self.moveText2.insert(0.0, self.cpuPokemon.printHP() + "\n" + self.cpuPokemon.printMoves())
             self.moveText1.config(state=DISABLED)
-            self.moveText2.config(state=DISABLED)
+            # self.moveText2.config(state=DISABLED)
 
             if not self.userPokemon.isAlive():
                 self.txtStats.config(state=NORMAL)
@@ -283,7 +283,7 @@ class Application(Frame):
                 self.txtStats.config(state=DISABLED)
                 self.restartBtn.config(state=NORMAL)
                 self.moveText1.config(state=DISABLED)
-                self.moveText2.config(state=DISABLED)
+                # self.moveText2.config(state=DISABLED)
                 self.battleBtn.config(state=DISABLED)
 
             else:
@@ -298,15 +298,15 @@ class Application(Frame):
         # Resetting all the widgets
         self.txtStats.config(state=NORMAL)
         self.moveText1.config(state=NORMAL)
-        self.moveText2.config(state=NORMAL)
+        # self.moveText2.config(state=NORMAL)
 
         self.txtStats.delete(0.0, END)
         self.moveText1.delete(0.0, END)
-        self.moveText2.delete(0.0, END)
+        # self.moveText2.delete(0.0, END)
 
         self.txtStats.config(state=DISABLED)
         self.moveText1.config(state=DISABLED)
-        self.moveText2.config(state=DISABLED)
+        # self.moveText2.config(state=DISABLED)
 
         # Enabling widgets so the window returns to its original state
         self.entName1.config(state=NORMAL)
